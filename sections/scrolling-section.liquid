@@ -1,0 +1,346 @@
+{% liquid
+  assign paddingX = section.settings.paddingX
+  assign paddingY = section.settings.paddingY
+  assign radius = section.settings.radius
+  assign bg = section.settings.backgroundcolor
+  assign sectionbg = section.settings.bg
+  assign color = section.settings.color
+  assign size = section.settings.size
+  assign borderfont = section.settings.borderfont
+  
+  assign columnwidth = section.settings.columnwidth 
+  assign ratio = section.settings.ratio
+%}
+
+<div class="{{ section.id }}  " style="background-color:{{ sectionbg }};">
+  {% unless section.settings.title == empty %}
+    <div class="sectionTitle">
+      <h2>{{ section.settings.title }}</h2>
+    </div>
+  {% endunless %}
+  <div class="marqueeSection ">
+    <div class="marquee">
+      {% for block in section.blocks %}
+        {% case block.type %}
+          {% when 'image' %}
+            {% liquid
+              assign image = block.settings.image
+              assign link = block.settings.link
+            %}
+
+            <div class="cols"  >
+              {% if image != blank %} 
+                <a href="{{ link }}" class="">
+                  {{
+                    image
+                    | image_url: width: '800'
+                    | image_tag: loading: 'lazy' 
+                  }}
+                </a>
+
+              {% else %}
+                {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+              {% endif %}
+            </div>
+
+          {% when 'title' %}
+            {% liquid
+              assign title = block.settings.title
+              assign link = block.settings.link
+            %}
+
+            {% if title != blank %}
+              <a
+                {% if link != blank %}
+                  href="{{ link }}"
+                {% endif %}
+                style="{{ title_style }}"
+              >
+                {{ title }}
+              </a>
+            {% endif %}
+        {% endcase %}
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+
+
+{% capture image_style %}
+      border-radius: {{ radius }};
+      aspect-ratio: {{ ratio }};
+      object-fit:cover;
+      width:100%;
+    {% endcapture %}
+{% capture title_style %}
+      
+      color:{{ color }};
+      border-radius: {{ radius }};
+      
+      padding: {{ paddingY }}px {{ paddingX }}px;
+       background:  {{ bg }} ;
+      {% unless link %}cursor: auto;{% endunless %}  
+      font-size: {{ size }}px; 
+       
+      {% unless borderfont == false %} 
+        -webkit-text-fill-color: white;
+        color: transparent;
+        font-style:normal;
+        white-space: nowrap; 
+        text-shadow: -1px -1px 0 #16191c, 1px -1px 0 #16191c, -1px 1px 0 #16191c, 1px 1px 0 #16191c;
+    {% endunless %}
+          
+    {% endcapture %}
+
+<style>
+    .{{ section.id }}{
+      overflow:hidden;
+
+      padding:{{section.settings.padding}};
+    }
+    .sectionTitle {
+      text-align: center;
+      padding:0 20px 30px;
+
+  }
+    .sectionTitle h2 {
+      font-size: 30px;
+  }
+    .sectionTitle h2 em {
+      font-weight: 100;
+      font-style: italic;
+  }
+
+    .{{ section.id }} .marqueeSection {
+      display: flex;
+      align-items: center;
+      transform: translate3d(0%, 0, 0);
+      animation: no-transform  100s linear infinite;
+  }
+  .{{ section.id }} .marqueeSection:hover {
+      animation-play-state: paused;
+  }
+    @keyframes no-transform{
+      0% {
+      transform: translate3d(0px, 0, 0);
+  }
+  100% {
+      transform: translate3d(-{{section.settings.width }}, 0, 0);
+  }
+    }
+
+
+  .{{ section.id }} .marquee {
+      display: flex;
+      flex: 0 0 {{section.settings.width}};
+      gap: 15px;
+      align-items: center;
+      justify-content:center;
+  }
+
+  .{{ section.id }} .marquee .cols{
+    flex: 0 0 {{ columnwidth }}px; max-width:{{ columnwidth }}px;
+  }
+  .{{ section.id }} .marquee img{
+      max-width: 100%;
+      height: auto;
+      object-fit: cover;
+      transition-duration:0.4s;
+      overflow:hidden;
+    font-size: 18px;
+    {{image_style}}
+
+    }
+    .marquee img:hover{
+      /* border-radius:0 !important; */
+      /* transform:scale(1.05); */
+    }
+    .marquee a em{
+      font-weight: 100;
+      font-style: italic;
+      text-transform: capitalize;font-family: "Gruppo", sans-serif;
+    font-weight: 400;
+
+    }
+
+
+  .{{ section.id }} .marqueeSection .marquee a{
+     /* font-style:italic; */
+      text-transform:uppercase;
+      text-align:center;
+      object-fit:cover;
+      flex: 0 0 auto;
+      display:block;
+     {{title_style}}
+  }
+
+
+    @media(max-width: 767px){
+        .{{ section.id }}{
+          padding:10px 0;
+        }
+      .marqueeSection  .marquee a{
+        font-size:30px !important;
+      }
+      .{{ section.id }} .marquee {
+          flex: 0 0 1000px;
+      }
+    }
+</style>
+{% schema %}
+{
+  "name": "Scrolling Section",
+  "settings": [
+    {
+      "type": "inline_richtext",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "text",
+      "id": "width",
+      "label": "Marquee Width",
+      "default":"2160px"
+    },
+    {
+      "type": "text",
+      "id": "padding",
+      "label": "Padding",
+      "default":"40px 0"
+
+    },
+  {
+    "type": "color",
+    "id": "bg",
+      "label": "Background color"
+
+  },
+
+    {
+      "type": "header",
+      "content": "Title Style"
+    },
+    {
+      "type": "range",
+      "min": 1,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "id": "paddingY",
+      "label": "Padding Top Bottom",
+      "default":6
+    },
+    {
+      "type": "range",
+      "min": 1,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "id": "paddingX",
+      "label": "Padding Left Right",
+      "default":35
+    },
+    {
+      "type": "range",
+      "min": 16,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "id": "size",
+      "label": "Font Size",
+      "default":24
+    },
+    {
+      "default":"50px",
+      "id": "radius",
+      "label": "Shape Style",
+      "type": "select",
+      "options": [{"label": "Rounded","value": "10px"},{"label": "Round","value": "50px"},{"label": "Square","value": "0"}]
+    },
+    {
+      "type": "checkbox",
+      "id": "borderfont",
+      "label": "Text Style",
+      "default":false
+
+    },
+    {
+      "default":"#fff",
+      "id": "backgroundcolor",
+      "label": "Background Color",
+      "type": "color"
+    },
+    {
+      "type": "color",
+      "id": "color",
+      "label": "Text Color"
+
+    },
+    {
+      "type": "header",
+      "content": "Image Style"
+    },
+    
+  {
+    "type": "range",
+    "min": 20,
+    "max": 1000,
+    "step": 10,
+    "unit": "px",
+    "id": "columnwidth",
+    "label": "Column Width",
+    "default":200
+  }, 
+  {
+    "default":"auto",
+    "id": "ratio",
+    "label": "Aspect Ratio",
+    "type": "select",
+    "options": [{"label": "1/1","value": "1/1"},{"label": "10/5","value": "10/5"},{"label": "12/10","value": "12/10"},{"label": "10/12","value": "10/12"},{"label": "Auto","value": "auto"}]
+  }
+  ],
+   "blocks": [
+       {
+  "name":"Title",
+  "type": "title",
+  "settings":[
+
+    {
+      "type":"inline_richtext",
+      "id":"title",
+      "label":"Title"
+    } ,
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    },
+
+
+      ]
+
+},
+           {
+"name":"Image",
+"type": "image",
+"settings":[
+
+  {
+    "type":"image_picker",
+    "id":"image",
+    "label":"Image"
+  } ,
+  {
+    "type": "url",
+    "id": "link",
+    "label": "Link"
+  }
+
+    ]
+
+  }
+     ],
+  "presets": [{"name": "Scrolling Section"}]
+}
+{% endschema %}
