@@ -1,6 +1,747 @@
+{% liquid 
+  assign review = section.settings
+  assign title = review.title 
+  assign radius = review.radius 
+  assign backgroundcolor = review.backgroundcolor
+  assign reviewsPerRow = review.reviewsPerRow
+  assign videoRatio = review.videoRatio
+  assign paddingtop = review.paddingtop
+  assign paddingbottom = review.paddingbottom
+  assign containerwidth = review.containerwidth
+  assign reviewalign = review.reviewalign
+  assign sectioncolor = review.sectioncolor
+  assign btntext = review.btntext
+  assign url = review.url
+  assign btncolor = review.btncolor
+  assign reviewstyle = review.reviewstyle
+  assign paddingy = review.paddingy
+  assign paddingx = review.paddingx
+  
+  assign titlecolor = review.titlecolor
+  assign subtitlecolor = review.subtitlecolor
+  assign reviewcolor = review.reviewcolor
+  assign headertitlecolor = review.headertitlecolor
+  
+    
+   
+%}
+ 
+<div class="container">
+  {% unless  title == empty %} 
+  <div class="sectionTitle" style="justify-content:center;">
+    <h2>
+      {{ title }}
+    </h2>
+  </div>
+  {% endunless %}
+  
+  <div class="flex">
+    {% liquid 
+
+      assign reviewsize = section.blocks.size
+    
+    %}
+     
+     {% for block in section.blocks %} 
+       {% liquid 
+         assign reviewcontent =  block.settings.reviewcontent
+         assign customername =  block.settings.customername
+         assign customerdesignation =  block.settings.customerdesignation
+         assign customerpicture =  block.settings.customerpicture
+         assign customerrating =  block.settings.customerrating
+
+
+         
+        assign video_id = block.settings.video.id | default: block.settings.video_url.id 
+
+        assign video = block.settings.video
+        assign video_url = block.settings.video_url
+        assign enable_video_looping = block.settings.enable_video_looping
+         assign reviewalignment = block.settings.reviewalignment
+         assign autoplay = block.settings.autoplay
+         
+         assign media = block.settings.media
+       %}
+
+      <div class="reviewBox" style="flex-direction:{{reviewalignment}};"> 
+
+
+
+        {% if reviewstyle == 'style4' %}
+
+         
+        
+        <div class="contentReview {{ reviewstyle }}">
+            
+         <p>{{ reviewcontent }}</p>
+          
+       </div>
+       {% if media != blank %}
+       <div class="mediaReview {{ reviewstyle }}"> 
+           <img src="{{ media | img_url:'500x' }}" width="100%" height="auto" alt="{{ media.alt }}" /> 
+       </div>
+      {% endif %}
+        <div class="contentReview {{ reviewstyle }}">
+           
+         <div class="contentReviewRight" style="{% if customerpicture != blank %}padding-left: 10px;{% endif %}">
+           <strong>{{ customerdesignation }}</strong> 
+           <h3>{{ customername }}</h3> 
+         </div>
+         
+          
+       </div>
+
+          
+
+         {% else %}
+          
+         {% if customername != blank %}
+        <div class="contentReview {{ reviewstyle }}">
+          {% if customerpicture != blank %}
+           <img src="{{ customerpicture | img_url:'200x' }}" width="100%" height="auto" alt="{{ customerpicture.alt }}" />
+          {% endif %}
+         <div class="contentReviewRight" style="{% if customerpicture != blank %}padding-left: 10px;{% endif %}">
+           <h3>{{ customername }}</h3>
+           <strong>{{ customerdesignation }}</strong> 
+           <div class="rating">
+             {% render 'rating-star', customerrating:customerrating %}
+           </div>
+           
+         </div>
+         <p>{{ reviewcontent }}</p>
+          
+       </div>
+         {% endif %}
+       <div class="mediaReview">
+         {% if media != blank %}
+           <img src="{{ media | img_url:'200x' }}" width="100%" height="auto" alt="{{ media.alt }}" />
+          {% endif %}
+       </div>
+
+        {% endif %}
+
+
+        {%- if video_url != null -%}
+       <div class="videoReview">
+           {%- liquid
+             assign loop = ''
+             if enable_video_looping
+               assign loop = '&loop=1&playlist=' | append: video_id
+             endif
+
+             assign play = 0
+             if autoplay  
+              assign play = 1
+             endif
+
+              
+           -%}
+           {%- if video_url.type == 'youtube' -%}
+             <iframe
+               src="https://www.youtube.com/embed/{{ video_id }}?enablejsapi=1&autoplay={{ play }}{{ loop }}"
+               class="js-youtube"
+               allow="autoplay; encrypted-media"
+               allowfullscreen
+               title="{{ block.settings.description | escape }}"
+             ></iframe>
+           {%- else -%}
+             <iframe
+               src="https://player.vimeo.com/video/{{ video_id }}?autoplay=1{{ loop }}"
+               class="js-vimeo"
+               allow="autoplay; encrypted-media"
+               allowfullscreen
+               title="{{ block.settings.description | escape }}"
+             ></iframe>
+           {%- endif -%}
+         
+    </div>
+  {%- endif -%}
+
+        
+  {%- if video != null   -%}
+       <div class="videoReview">
+              {%- liquid
+                assign loop = ''
+                if enable_video_looping
+                  assign loop = '&loop=1&playlist=' | append: video_id
+                endif
+
+                assign play = 0
+                if autoplay  
+                 assign play = 1
+                endif
+ 
+                 
+              -%}
+               
+              {{
+                video
+                | video_tag:
+                  image_size: '1100x',
+                  autoplay: true,
+                  loop: enable_video_looping,
+                  controls: false,
+                  muted: true,
+                  autoplay: true
+              }}
+       </div>
+      {%- endif -%}
+     
+       
+        
+      </div>
+       
+      {% endfor %}
+  </div>
+
+  {% if  url != blank %} 
+  <div class="buttonStyle" style="">
+    <a href="{{ url }}">
+      {{ btntext }}
+    </a>
+  </div>
+  {% endif %}
+  
+  
+</div>
+
+
+<style>
+  .customReview{
+    display:flex;
+    justify-content:center;
+  }
+  #shopify-section-{{ section.id }}.customReview{
+    padding:{{paddingtop}} 20px {{paddingbottom}};
+    background-color:{{sectioncolor}};
+    
+  }
+   #shopify-section-{{ section.id }}.customReview .container{
+    max-width:{{containerwidth}};
+    
+  }
+  .customReview .container .sectionTitle { 
+        display: flex;
+    flex-wrap: wrap;
+  }
+  #shopify-section-{{ section.id }}.customReview .container .sectionTitle h2{  
+    color:{{headertitlecolor}};
+  }
+  .customReview .container .sectionTitle h2{ 
+    font-size: 40px;
+    max-width: 850px;
+    text-align: center;
+    margin-bottom: 50px; 
+  }
+  .customReview .container .buttonStyle { 
+        display: flex;
+    flex-wrap: wrap;
+    margin-top: 50px;
+    justify-content:center;
+} 
+  .customReview .container .buttonStyle a{  
+    color: #fff; 
+    padding: 10px 30px;
+    text-decoration: none; 
+   
+ }
+ #shopify-section-{{ section.id }}.customReview .container .buttonStyle a{ 
+    background-color:{{btncolor}}; 
+    border-radius:{{radius}};
+   
+ }
+  .customReview .flex{
+    display:grid; 
+    gap: 20px; 
+  }
+  #shopify-section-{{ section.id }}.customReview .flex{ 
+    align-items:{{reviewalign}};
+    grid-template-columns: repeat({{reviewsPerRow}}, 1fr);
+  }
+  .customReview .flex .reviewBox{
+    display:flex; 
+    flex-wrap:wrap;
+    gap: 10px 0; 
+  }
+  .customReview .flex .reviewBox .contentReview{
+    display:flex; 
+    flex-wrap:wrap;
+    align-items: flex-start;  
+  } 
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .contentReview{ 
+    padding: {{paddingy}}px {{paddingx}}px; 
+  } 
+
+ 
+  
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .contentReview{
+     
+    background-color:{{backgroundcolor}}; 
+    border-radius:{{radius}};
+  }
+    
+  .customReview .flex .reviewBox .contentReview img{ 
+    max-width: 50px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+  .customReview .flex .reviewBox .contentReview .contentReviewRight{ 
+     
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 50px);
+    flex-basis: calc(100% - 50px);
+    max-width: 100%;
+   
+  }
+ 
+
+  .customReview .flex .reviewBox .contentReview .contentReviewRight h3{ 
+    font-size: 16px;
+    line-height: 110%;
+     
+  }
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .contentReview .contentReviewRight h3{  
+    color:{{titlecolor}};
+  }
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .contentReview .contentReviewRight strong{
+  color: {{subtitlecolor}};
+  }
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .contentReview p{ 
+    color:{{reviewcolor}};
+    
+  }
+  .customReview .flex .reviewBox .contentReview .contentReviewRight strong{     
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .customReview .flex .reviewBox .contentReview .contentReviewRight .rating { 
+    
+    display: flex;
+    gap: 6px;
+  }
+  .customReview .flex .reviewBox .contentReview .contentReviewRight .rating svg{ 
+    
+    fill: #e0be04;
+  }
+  .customReview .flex .reviewBox .contentReview p{ 
+        font-size: 15px;
+    line-height: 130%;
+    margin-top:12px; 
+    
+  }
+
+  .customReview .flex .reviewBox .mediaReview{ 
+    object-fit: cover;
+  } 
+  .customReview .flex .reviewBox .videoReview{ 
+    object-fit: cover;
+  } 
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .videoReview{
+      aspect-ratio: 1 / {{videoRatio}}; 
+      width:100%;
+  }
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .mediaReview{
+      aspect-ratio: 1 / {{videoRatio}}; 
+  } 
+  .customReview .flex .reviewBox .videoReview iframe,
+  .customReview .flex .reviewBox .videoReview video,
+  .customReview .flex .reviewBox .mediaReview img{ 
+      width: 100%; 
+    object-fit: cover;
+      border: 0; 
+    height: 100%;    
+    }
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .mediaReview img,
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .videoReview iframe,
+  #shopify-section-{{ section.id }}.customReview .flex .reviewBox .videoReview video{ 
+    
+    border-radius:{{radius}}; 
+    aspect-ratio: 1 / {{videoRatio}}; 
+    }
+
+
+  
+  /*** style2 *****/
+  .customReview .flex .reviewBox .contentReview.style2 {
+    flex-direction: column;
+    text-align: center;
+    justify-content:center;
+    align-items: center;
+  }
+.customReview .flex .reviewBox .contentReview.style2 img {
+    width: 100%;
+    border-radius: 100%;
+    max-width: 300px;
+}
+  .customReview .flex .reviewBox .contentReview.style2 .contentReviewRight .rating {
+    
+    justify-content: center;
+}
+  .customReview .flex .reviewBox .contentReview.style2 p {
+    font-size: 16px; 
+    color: #333;
+}
+  .customReview .flex .reviewBox .contentReview.style2 .contentReviewRight h3 {
+    font-size: 20px;
+    margin-top: 20px;
+}
+  .customReview .flex .reviewBox .contentReview.style2 .contentReviewRight strong {
+    
+    font-size: 15px;
+    color: {{subtitlecolor}};
+    line-height: 110%;
+    margin-bottom: 10px;
+}
+
+  /***** Style 3 ***/
+
+
+  .customReview .flex .reviewBox .contentReview.style3 {
+    flex-direction: column;
+    text-align: center;
+    justify-content:center;
+    align-items: center;
+  }
+.customReview .flex .reviewBox .contentReview.style3 img {
+    width: 100%;
+    border-radius: 100%;
+    max-width: 300px;
+}
+  .customReview .flex .reviewBox .contentReview.style3 .contentReviewRight .rating {
+    
+    justify-content: center;
+}
+  .customReview .flex .reviewBox .contentReview.style3 p {
+    font-size: 18px;  
+}
+  .customReview .flex .reviewBox .contentReview.style3 .contentReviewRight h3 {
+        font-size: 24px;
+    margin-top: 10px; 
+}
+  .customReview .flex .reviewBox .contentReview.style3 .contentReviewRight strong {
+    
+font-size: 16px; 
+    line-height: 110%;
+    margin-bottom: 0;
+    order: -1;
+    font-weight: 400;
+}
+
+  /***** Style 4 ***/
+
+.customReview .flex .reviewBox .contentReview.style4 .contentReviewRight {
+    
+    width: 100%;
+    flex-basis: 100%;
+    max-width: 100%;
+}
+  .customReview .flex .reviewBox .contentReview.style4 {
+    flex-direction: column;
+    text-align: center;
+    justify-content:center;
+    align-items: center;
+  }
+.customReview .flex .reviewBox .contentReview.style4 img {
+    width: 100%;
+    border-radius: 100%;
+    max-width: 300px;
+}
+  .customReview .flex .reviewBox .contentReview.style4 .contentReviewRight .rating {
+    
+    justify-content: center;
+}
+  .customReview .flex .reviewBox .contentReview.style4 p {
+    font-size: 18px;  
+}
+  .customReview .flex .reviewBox .contentReview.style4 .contentReviewRight h3 {
+      
+    font-size: 18px;  
+}
+  .customReview .flex .reviewBox .contentReview.style4 .contentReviewRight strong {
+    
+font-size: 18px; 
+    line-height: 130%;  
+    font-weight: 500;
+}
+
+  
+  @media(max-width:767px){
+    .customReview { 
+    padding: 40px 20px !important;
+}
+    .customReview .container .sectionTitle h2 {
+    font-size: 30px; 
+    margin-bottom: 40px;
+}
+    .customReview .flex { 
+    overflow-x: auto;
+    grid-auto-flow: column; 
+    gap: 20px;
+    overflow-x: auto;
+}
+    #shopify-section-{{ section.id }}.customReview .flex{
+      grid-template-columns: repeat({{ reviewsize }}, minmax(100%, 1fr)) !important;
+    }
+    .customReview .flex .reviewBox .videoReview { 
+    aspect-ratio: 1 / 0.8 !important;
+}
+  }
+</style>
+
 {% schema %}
   {
-    "name": "Section name",
-    "settings": []
+    "name": "Customer Review",
+    "class": "customReview",
+    "tag": "section",
+    "settings": [
+      {
+        "type": "text",
+        "default":"1200px",
+        "id": "containerwidth",
+        "label": "Container Width"
+      },
+      {
+        "type": "inline_richtext",
+        "id": "title",
+        "label": "Title",
+        "default":"What Thousands of Happy Tyent Hydrozen Water Fans are Saying"
+      },
+      {
+        "type": "text",
+        "id": "btntext",
+        "label": "Button Text",
+        "default":"Get My Ebook"
+      },
+      {
+        "type": "url",
+        "id": "url",
+        "label": "URL" 
+      },      
+      {
+        "type": "color",
+        "id": "btncolor",
+        "label": "Button Color",
+        "default":"#224c94"
+      },
+
+
+      {
+        "type": "select",
+        "default":"style1",
+        "id": "reviewstyle",
+        "label": "Review Style",
+        "options": [
+          {"value": "style1","label": "Style One"}, 
+          {"value": "style2","label": "Style Two"}, 
+          {"value": "style3","label": "Style Three"}, 
+          {"value": "style4","label": "Style Four"}
+        ]
+      },
+    
+      {
+        "type": "select",
+        "options": [
+          {"value": "flex-start","label": "Top"},
+          {"value": "center","label": "Middle"},
+          {"value": "flex-end","label": "Bottom"}
+        ],
+        "label": "Review Alignment",
+        "id": "reviewalign",
+        "default":"flex-start"
+      },
+      {
+        "type": "range",
+        "id": "reviewsPerRow",
+        "label": "Reviews Per Row" ,
+        "default":3,
+        "min":1,
+        "max": 6,
+        "step": 1
+      },
+      {
+        "default":"50px",
+        "id": "radius",
+        "label": "Shape Style",
+        "type": "select",
+        "options": [{"label": "Rounded","value": "10px"},{"label": "Round","value": "50px"},{"label": "Square","value": "0"}]
+      }, 
+      {
+        "type": "range",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "default":20,
+        "id":"paddingx",
+        "label": "Padding Horizontal",
+        "unit": "px"
+      },
+      {
+        "type": "range",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "default":20,
+        "id":"paddingy",
+        "label": "Padding Vertical",
+        "unit": "px"
+      },
+      { 
+        "id": "videoRatio",
+        "label": "Video Ratio",
+        "type": "range",
+        "min": 0,
+        "max":6,
+        "step": 0.1,
+        "default":0.7
+      }, 
+      {
+        "type": "color",
+        "id": "backgroundcolor",
+        "label": "Review Background Color",
+        "default":"#f4f4f4"
+      },
+      {
+        "type": "color",
+        "id": "sectioncolor",
+        "label": "Section Background Color",
+        "default":"#fff"
+      },
+      {
+        "type": "color",
+        "id": "headertitlecolor",
+        "label": "Header Title Color",
+        "default":"#000"
+      },
+      {
+        "type": "color",
+        "id": "titlecolor",
+        "label": "Title Color",
+        "default":"#224C94"
+      },
+      {
+        "type": "color",
+        "id": "subtitlecolor",
+        "label": "Content Color",
+        "default":"#000"
+      },
+      {
+        "type": "color",
+        "id": "reviewcolor",
+        "label": "Review Color",
+        "default":"#000"
+      },
+      {
+        "type": "text",
+        "label": "Padding Top",
+        "id": "paddingtop",
+        "default":"50px"
+      },
+      {
+        "type": "text",
+        "label": "Padding Bottom",
+        "id": "paddingbottom",
+        "default":"50px"
+      }
+    ],
+    "blocks": [
+      {
+        "type": "review",
+        "name":"Review",
+        "settings": [
+          {
+            "type": "textarea",
+            "id": "reviewcontent",
+            "label": "Review Content",
+            "default":"outdoors and I'm dressed in a three piece wool suit, topped off with a Homburg Hat all summer long, and summers in Toronto are HUMID."
+          },
+          {
+            "type": "text",
+            "id": "customername",
+            "label": "Customer Name",
+            "default":"Yannick Bisson"
+          },
+          {
+            "type": "textarea",
+            "id": "customerdesignation",
+            "label": "Content",
+            "default":"Canadian Film Actor, Murdoch Mysteries"
+          },
+          {
+            "type": "image_picker",
+            "id": "customerpicture",
+            "label": "Customer Picture" 
+          }, 
+          {
+            "type": "range",
+            "id": "customerrating",
+            "label": "Customer Rating" ,
+            "default":5,
+            "min":0,
+            "max": 5,
+            "step": 0.5
+          },
+          {
+            "type": "header",
+            "content": "Image Review"
+          },
+          {
+            "type": "image_picker",
+            "id": "media",
+            "label": "Media"
+          },
+          {
+            "type": "header",
+            "content": "Video Review"
+          },
+          {
+        "type": "video",
+        "id": "video",
+        "label": "Video"
+      }, 
+      {
+        "type": "video_url",
+        "id": "video_url",
+        "accept": ["youtube", "vimeo"], 
+        "label": "Youtube/Vimeo",
+        "info": "Add Vimeo or Youtube Link"
+      },
+      {
+        "type": "checkbox",
+        "id": "autoplay",
+        "label": "Auto Play",
+        "default": false
+      },
+      {
+        "type": "checkbox",
+        "id": "enable_video_looping",
+        "label": "Looping",
+        "default": false
+      },
+    
+      {
+        "type": "select",
+        "options": [
+          {"value": "column-reverse","label": "Video + Text Review"},
+          {"value": "column","label": "Text Review + Video"} 
+        ],
+        "label": "Review Alignment",
+        "id": "reviewalignment",
+        "default":"column"
+      },
+ 
+       
+          
+        ]
+      }
+    ],
+    "disabled_on": {
+       "groups": ["header","footer"]
+    },
+    "presets": [
+      {
+        "name": "Customer Review"
+      }
+    ]
   }
 {% endschema %}
